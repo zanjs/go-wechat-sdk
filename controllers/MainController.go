@@ -1,176 +1,161 @@
 package controllers
 
 import (
-	"fmt"
-	"github.com/gin-contrib/cache"
-	"github.com/gin-contrib/cache/persistence"
-	"github.com/gin-gonic/contrib/sessions"
-	"github.com/gin-gonic/gin"
-	"log"
-	db "wechat/connections/database/mysql"
-	"wechat/filters/auth"
-	m "wechat/models"
+	// "github.com/gin-gonic/gin"
 	"net/http"
-	"time"
+	"io"
+	"errors"
+	"io/ioutil"
+	"encoding/json"
+	"bytes"
+	"compress/gzip"
 )
 
-func IndexApi(c *gin.Context) {
 
-	// 返回html
-	c.HTML(http.StatusOK, "index.tpl", gin.H{
-		"title": "GO GO GO!",
-	})
+// 内部api
+// - 动态获取公众号数据appid, appsecret, payid, paysecret
+// - 构建签名, 签名算法
+// - post 请求
+// - get 请求
+// - 获取access_token
+
+// 文档：
+
+// https://mp.weixin.qq.com/wiki?t=resource/res_main&id=mp1445241432  微信公众号
+// https://developers.weixin.qq.com/miniprogram/dev/api/qrcode.html  微信小程序
+// https://pay.weixin.qq.com/wiki/doc/api/index.html  微信支付
+
+
+// ---------------------------
+// API常数
+// ---------------------------
+
+const (
+	GET_ACCESS_TOKEN_API = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET" // 获取access_token
+
+	// 网页授权
+
+	GET_WEB_OAUTH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code" // 获取特殊的网页授权access_token
+	REFRESH_WEB_OAUTH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=APPID&grant_type=refresh_token&refresh_token=REFRESH_TOKEN" // 刷新token
+	GET_WEB_OAUTH_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN" // 拉取用户信息(需scope为 snsapi_userinfo)
+	CHECK_WEB_OAUTH_ACCESS_TOKEN_EFFECTIVE = "https://api.weixin.qq.com/sns/auth?access_token=ACCESS_TOKEN&openid=OPENID" // 检验token有效性
+
+	// 模板消息
+
+	SEND_TEMPLATE_MESSAGE = "https://api.weixin.qq.com/cgi-bin/message/template/send?access_token=ACCESS_TOKEN" // 发送模板消息
+
+	// 小程序登录
+
+	WXAPP_OAUTH = "https://api.weixin.qq.com/sns/jscode2session?appid=APPID&secret=SECRET&js_code=JSCODE&grant_type=authorization_code" // 小程序获取sessionkey
+	GET_WXAPP_CODE = "https://api.weixin.qq.com/wxa/getwxacode?access_token=ACCESS_TOKEN" // 获取小程序码
+	GET_WXAPP_CODE_UNLIMIT = "https://api.weixin.qq.com/wxa/getwxacodeunlimit?access_token=ACCESS_TOKEN" // 获取小程序码
+	GET_WXAPP_CODE_QRCODE = "https://api.weixin.qq.com/cgi-bin/wxaapp/createwxaqrcode?access_token=ACCESS_TOKEN" // 获取小程序二维码
+	SEND_WXAPP_TEMPLATE_MESSAGE  = "https://api.weixin.qq.com/cgi-bin/message/wxopen/template/send?access_token=ACCESS_TOKEN" // 发送小程序服务通知
+
+	// 微信支付
+
+	PAY_UNIFIED_ORDER = "https://api.mch.weixin.qq.com/pay/unifiedorder" // 下订单
+)
+
+// ---------------------------
+// 外部api
+// ---------------------------
+
+func GetNewAccessToken()  {
+	return
 }
 
-func DBexample(c *gin.Context) {
+// ---------------------------
+// sdk内部Api
+// ---------------------------
 
-	// 数据库插入
-	insertRs := db.Exec("insert into users (name, avatar, sex) values (?, ?, ?)", "人才", "unknown", 1)
-	insertId, _ := insertRs.LastInsertId()
-	fmt.Printf("insert id: %d\n", insertId)
+func GetToken()  {
+	return
+}
 
-	// 数据库更新
-	db.Exec("update users set name = ? where id = ?", "饭桶", insertId)
+func GetAccountInfo(accountId int) (map[string]string, error) {
+	return map[string]string{}, nil
+}
 
-	// 数据库查询
-	rs, con := db.Query("select name,avatar,id from users where id < ?", 100)
-	fmt.Println(rs[0]["name"])
-	defer con.Close() // 函数结束时关闭数据库连接
-
-	// 数据库事务
-	Tx := db.BeginTransactions()
-	_, err := Tx.Query("select name,avatar,id from users where id < ?", 100)
+func MakeGetReq(url string, data map[string]string) (map[string]interface{}, error) {
+	
+	var count = 0
+	for k, v := range data {
+		if count == 0 {
+			url += "?" + k + "=" + v
+		} else {
+			url += "&" + k + "=" + v
+		}
+		count++
+	}
+	
+	res, err := http.Get(url)
 	if err != nil {
-		Tx.Tx.Rollback()
+		return map[string]interface{}{}, err
 	}
-	Tx.Tx.Commit()
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": gin.H{
-			"query_result": rs,
-		},
-	})
-}
-
-func StoreExample(c *gin.Context) {
-
-	// session存储
-	session := sessions.Default(c)
-	session.Set("key", "value") // 0表示不过期
-
-	str := session.Get("key")
-	fmt.Printf("session key: %s", str)
-
-	// cache存储
-	cacheStore, _ := c.MustGet(cache.CACHE_MIDDLEWARE_KEY).(*persistence.CacheStore)
-	(*cacheStore).Set("key", "value", time.Minute)
-	(*cacheStore).Delete("key")
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": gin.H{
-			"store_result": str,
-		},
-	})
-}
-
-func OrmExample(c *gin.Context) {
-
-	// Create
-	m.Model.Create(&m.User{Name: "L1212", Avatar: "unknown", Sex: 1})
-
-	// Read
-	var user m.User
-	m.Model.First(&user, 1) // find user with id 1
-	//fmt.Printf("user model insert %d\n", user.Model.ID)
-	// m.Model.First(&user, "name = ?", "L1212") // find user with name l1212
-
-	// Update
-	m.Model.Model(&user).Update("avatar", "123456")
-
-	// Delete
-	// m.Model.Delete(&user)
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": gin.H{
-			"orm_result": user,
-		},
-	})
-}
-
-func CookieSetExample(c *gin.Context) {
-	authDr, _ := c.MustGet("web_auth").(*auth.Auth)
-
-	id := c.Param("userid")
-
-	rs, con := db.Query("select name,avatar,id from users where id = ?", id)
-	defer con.Close() // 函数结束时关闭数据库连接
-
-	log.Printf("len(rs): %d", len(rs))
-	if len(rs) == 0 {
-		c.HTML(http.StatusOK, "index.tpl", gin.H{
-			"title": "wrong user id",
-		})
-		return
+	if res.StatusCode != 200 {
+		return map[string]interface{}{}, errors.New("网络错误")
 	}
 
-	(*authDr).Login(c.Request, c.Writer, map[string]interface{}{"id": id})
+	var reader io.ReadCloser
+	if res.Header.Get("Content-Encoding") == "gzip" {
+		reader, err = gzip.NewReader(res.Body)
+		if err != nil {
+			return map[string]interface{}{}, err
+		}
+	} else {
+		reader = res.Body
+	}
 
-	// 返回html
-	c.HTML(http.StatusOK, "index.tpl", gin.H{
-		"title": "login success!",
-	})
+	defer res.Body.Close()
+
+	body, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+
+	var resJsonData map[string]interface{}
+	err = json.Unmarshal(body, &resJsonData)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+
+	return resJsonData, nil
 }
 
-func CookieGetExample(c *gin.Context) {
-	authDr, _ := c.MustGet("web_auth").(*auth.Auth)
+func MakePostReq(url string, postData map[string]interface{}, contentType string) (map[string]interface{}, error) {
+	jsonData ,jsonErr := json.Marshal(postData)
+	if jsonErr != nil {
+		return map[string]interface{}{}, jsonErr
+	}
 
-	userInfo := (*authDr).User(c).(map[interface{}]interface{})
-	id, _ := userInfo["id"].(string)
-	log.Println("id: " + id)
+	res, _ := http.Post(url, contentType, bytes.NewBuffer(jsonData))
 
-	rs, con := db.Query("select name,avatar,id from users where id = ?", id)
-	defer con.Close() // 函数结束时关闭数据库连接
+	var (
+		reader io.ReadCloser
+		err error
+	)
+	if res.Header.Get("Content-Encoding") == "gzip" {
+		reader, err = gzip.NewReader(res.Body)
+		if err != nil {
+			return map[string]interface{}{}, err
+		}
+	} else {
+		reader = res.Body
+	}
 
-	// 返回html
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": gin.H{
-			"user": rs,
-		},
-	})
-}
+	defer res.Body.Close()
 
-func JwtSetExample(c *gin.Context) {
-	authDr, _ := c.MustGet("jwt_auth").(*auth.Auth)
+	body, err := ioutil.ReadAll(reader)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
 
-	token, _ := (*authDr).Login(c.Request, c.Writer, map[string]interface{}{"id": "123"}).(string)
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": gin.H{
-			"token": token,
-		},
-	})
-}
-
-func JwtGetExample(c *gin.Context) {
-	authDr, _ := c.MustGet("jwt_auth").(*auth.Auth)
-
-	info := (*authDr).User(c).(map[string]interface{})
-
-	c.JSON(http.StatusOK, gin.H{
-		"code": 0,
-		"msg":  "ok",
-		"data": gin.H{
-			"id": info["id"],
-		},
-	})
+	var resJsonData map[string]interface{}
+	err = json.Unmarshal(body, &resJsonData)
+	if err != nil {
+		return map[string]interface{}{}, err
+	}
+	
+	return resJsonData, nil
 }
