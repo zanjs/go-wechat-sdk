@@ -64,8 +64,8 @@ const (
 // 返回：
 // 成功返回 {"access_token":"ACCESS_TOKEN","expires_in":7200}
 // 失败返回 {"errcode":40013,"errmsg":"invalid appid"}
-func GetNewAccessToken(appId string, appSecret string)  {
-	return
+func GetNewAccessToken(appId string, appSecret string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // GetWebOauthAccessToken
@@ -79,8 +79,8 @@ func GetNewAccessToken(appId string, appSecret string)  {
 // 返回：
 // 成功返回 { "access_token":"ACCESS_TOKEN", "expires_in":7200, "refresh_token":"REFRESH_TOKEN", "openid":"OPENID", "scope":"SCOPE" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid code"}
-func GetWebOauthAccessToken(appId string, appSecret string, code string)  {
-	return
+func GetWebOauthAccessToken(appId string, appSecret string, code string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // RefreshWebOauthAccessToken
@@ -93,8 +93,8 @@ func GetWebOauthAccessToken(appId string, appSecret string, code string)  {
 // 返回：
 // 成功返回 { "access_token":"ACCESS_TOKEN", "expires_in":7200, "refresh_token":"REFRESH_TOKEN", "openid":"OPENID", "scope":"SCOPE" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid code"}
-func RefreshWebOauthAccessToken(appId string, refreshToken string)  {
-	return
+func RefreshWebOauthAccessToken(appId string, refreshToken string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // GetWebOauthUserinfo
@@ -117,8 +117,8 @@ func RefreshWebOauthAccessToken(appId string, refreshToken string)  {
 // 		"unionid": "o6_bmasdasdsad6_2sgVt7hMZOPfL"
 // }
 // 失败返回 { "errcode":40003,"errmsg":" invalid openid "}
-func GetWebOauthUserinfo(openId string, lang string, accessToken string)  {
-	return
+func GetWebOauthUserinfo(openId string, lang string, accessToken string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // CheckWebOauthAccessTokenEffective
@@ -130,8 +130,8 @@ func GetWebOauthUserinfo(openId string, lang string, accessToken string)  {
 // 返回：
 // 成功返回 { "errcode":0,"errmsg":"ok"}
 // 失败返回 { "errcode":40003,"errmsg":"invalid openid"}
-func CheckWebOauthAccessTokenEffective(openId string, accessToken string)  {
-	return
+func CheckWebOauthAccessTokenEffective(openId string, accessToken string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // CheckWebOauthAccessTokenEffective
@@ -171,8 +171,8 @@ func CheckWebOauthAccessTokenEffective(openId string, accessToken string)  {
 // 返回：
 // 成功返回 { "errcode":0, "errmsg":"ok", "msgid":200228332 }
 // 失败返回 { "errcode":40003,"errmsg":"invalid openid"}
-func SendTemplateMessage(accountid int, data map[string]string)  {
-	return
+func SendTemplateMessage(accountid int, data map[string]string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 
@@ -187,8 +187,8 @@ func SendTemplateMessage(accountid int, data map[string]string)  {
 // 返回：
 // 成功返回 { "openid": "OPENID", "session_key": "SESSIONKEY", "unionid": "UNIONID" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
-func WxappOauth(appId string, appSecret string, jsCode string)  {
-	return
+func WxappOauth(appId string, appSecret string, jsCode string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // GetWxappCode
@@ -203,8 +203,8 @@ func WxappOauth(appId string, appSecret string, jsCode string)  {
 // 返回：
 // 成功返回 图片
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
-func GetWxappCode(data map[string]string)  {
-	return
+func GetWxappCode(data map[string]string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // GetWxappCodeUnlimit
@@ -220,8 +220,8 @@ func GetWxappCode(data map[string]string)  {
 // 返回：
 // 成功返回 图片
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
-func GetWxappCodeUnlimit(data map[string]string)  {
-	return
+func GetWxappCodeUnlimit(data map[string]string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // GetWxappCodeQrcode
@@ -233,8 +233,8 @@ func GetWxappCodeUnlimit(data map[string]string)  {
 // 返回：
 // 成功返回 图片
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
-func GetWxappCodeQrcode(data map[string]string)  {
-	return
+func GetWxappCodeQrcode(data map[string]string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // SendWxappTemplateMessage
@@ -251,8 +251,8 @@ func GetWxappCodeQrcode(data map[string]string)  {
 // 返回：
 // 成功返回 { "errcode":0, "errmsg":"ok" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
-func SendWxappTemplateMessage(accountid int, data map[string]string)  {
-	return
+func SendWxappTemplateMessage(accountid int, data map[string]string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // PayUnifiedOrder
@@ -287,8 +287,8 @@ func SendWxappTemplateMessage(accountid int, data map[string]string)  {
 // 	<prepay_id><![CDATA[wx201411101639507cbf6ffd8b0779950874]]></prepay_id>
 // 	<trade_type><![CDATA[JSAPI]]></trade_type>
 // </xml>
-func PayUnifiedOrder(accountid int, data map[string]string)  {
-	return
+func PayUnifiedOrder(accountid int, data map[string]string) (map[string]string, error) {
+	return map[string]string{}, nil
 }
 
 // ---------------------------

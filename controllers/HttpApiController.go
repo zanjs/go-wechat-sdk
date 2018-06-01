@@ -15,8 +15,6 @@ func CallMethod(c *gin.Context)  {
 	if method == "" {
 		return
 	}
-	caller.Call[method](accountId, map[string]string{
-		"data": "",
-	})
+	caller.Call(c, accountId)
 	return
 }
