@@ -1,66 +1,22 @@
 package controllers
 
 import (
-	// "github.com/gin-gonic/gin"
-	"wechat/module/wechat"
+	 "github.com/gin-gonic/gin"
+	"wechat/module/caller"
+	"strconv"
 )
 
-func GetNewAccessToken()  {
-	wechat.GetNewAccessToken()
-	return
-}
-
-func GetWebOauthAccessToken()  {
-	wechat.GetWebOauthAccessToken()
-	return
-}
-
-func RefreshWebOauthAccessToken()  {
-	wechat.RefreshWebOauthAccessToken()
-	return
-}
-
-func GetWebOauthUserinfo()  {
-	wechat.GetWebOauthUserinfo()
-	return
-}
-
-func CheckWebOauthAccessTokenEffective()  {
-	wechat.CheckWebOauthAccessTokenEffective()
-	return
-}
-
-func SendTemplateMessage()  {
-	wechat.SendTemplateMessage()
-	return
-}
-
-func WxappOauth()  {
-	wechat.WxappOauth()
-	return
-}
-
-func GetWxappCode()  {
-	wechat.GetWxappCode()
-	return
-}
-
-func GetWxappCodeUnlimit()  {
-	wechat.GetWxappCodeUnlimit()
-	return
-}
-
-func GetWxappCodeQrcode()  {
-	wechat.GetWxappCodeQrcode()
-	return
-}
-
-func SendWxappTemplateMessage()  {
-	wechat.SendWxappTemplateMessage()
-	return
-}
-
-func PayUnifiedOrder()  {
-	wechat.PayUnifiedOrder()
+func CallMethod(c *gin.Context)  {
+	accountId, err := strconv.Atoi(c.PostForm("accountId"))
+	if err != nil {
+		return
+	}
+	method := c.PostForm("method")
+	if method == "" {
+		return
+	}
+	caller.Call[method](accountId, map[string]string{
+		"data": "",
+	})
 	return
 }

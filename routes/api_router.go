@@ -35,4 +35,7 @@ func RegisterApiRouter(router *gin.Engine) {
 	// - 分布式etcd
 	// - go-client 客户端支持
 	// - c10k并发
+
+	api := router.Group("/api")
+	api.POST("/call", controllers.CallMethod)
 }
