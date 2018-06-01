@@ -28,14 +28,14 @@ import (
 // ---------------------------
 
 const (
-	GET_ACCESS_TOKEN_API = "https://api.weixin.qq.com/cgi-bin/token?grant_type=client_credential&appid=APPID&secret=APPSECRET" // 获取access_token
+	GET_ACCESS_TOKEN_API = "https://api.weixin.qq.com/cgi-bin/token" // 获取access_token
 
 	// 网页授权
 
-	GET_WEB_OAUTH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token?appid=APPID&secret=SECRET&code=CODE&grant_type=authorization_code" // 获取特殊的网页授权access_token
-	REFRESH_WEB_OAUTH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token?appid=APPID&grant_type=refresh_token&refresh_token=REFRESH_TOKEN" // 刷新token
+	GET_WEB_OAUTH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/access_token" // 获取特殊的网页授权access_token
+	REFRESH_WEB_OAUTH_ACCESS_TOKEN = "https://api.weixin.qq.com/sns/oauth2/refresh_token" // 刷新token
 	GET_WEB_OAUTH_USERINFO = "https://api.weixin.qq.com/sns/userinfo?access_token=ACCESS_TOKEN&openid=OPENID&lang=zh_CN" // 拉取用户信息(需scope为 snsapi_userinfo)
-	CHECK_WEB_OAUTH_ACCESS_TOKEN_EFFECTIVE = "https://api.weixin.qq.com/sns/auth?access_token=ACCESS_TOKEN&openid=OPENID" // 检验token有效性
+	CHECK_WEB_OAUTH_ACCESS_TOKEN_VALID = "https://api.weixin.qq.com/sns/auth?access_token=ACCESS_TOKEN&openid=OPENID" // 检验token有效性
 
 	// 模板消息
 
@@ -65,7 +65,15 @@ const (
 // 成功返回 {"access_token":"ACCESS_TOKEN","expires_in":7200}
 // 失败返回 {"errcode":40013,"errmsg":"invalid appid"}
 func GetNewAccessToken(appId string, appSecret string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakeGetReq(GET_ACCESS_TOKEN_API, map[string]string{
+		"grant_type":"client_credential",
+		"appid":appId,
+		"secret":appSecret,
+	})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // GetWebOauthAccessToken
@@ -80,7 +88,16 @@ func GetNewAccessToken(appId string, appSecret string) (map[string]string, error
 // 成功返回 { "access_token":"ACCESS_TOKEN", "expires_in":7200, "refresh_token":"REFRESH_TOKEN", "openid":"OPENID", "scope":"SCOPE" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid code"}
 func GetWebOauthAccessToken(appId string, appSecret string, code string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakeGetReq(GET_WEB_OAUTH_ACCESS_TOKEN, map[string]string{
+		"grant_type":"authorization_code",
+		"appid":appId,
+		"secret":appSecret,
+		"code":code,
+	})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // RefreshWebOauthAccessToken
@@ -94,7 +111,15 @@ func GetWebOauthAccessToken(appId string, appSecret string, code string) (map[st
 // 成功返回 { "access_token":"ACCESS_TOKEN", "expires_in":7200, "refresh_token":"REFRESH_TOKEN", "openid":"OPENID", "scope":"SCOPE" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid code"}
 func RefreshWebOauthAccessToken(appId string, refreshToken string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakeGetReq(REFRESH_WEB_OAUTH_ACCESS_TOKEN, map[string]string{
+		"grant_type":"refresh_token",
+		"appid":appId,
+		"refresh_token":refreshToken,
+	})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // GetWebOauthUserinfo
@@ -118,7 +143,15 @@ func RefreshWebOauthAccessToken(appId string, refreshToken string) (map[string]s
 // }
 // 失败返回 { "errcode":40003,"errmsg":" invalid openid "}
 func GetWebOauthUserinfo(openId string, lang string, accessToken string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakeGetReq(GET_WEB_OAUTH_USERINFO, map[string]string{
+		"lang":lang,
+		"openid":openId,
+		"access_token":accessToken,
+	})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // CheckWebOauthAccessTokenEffective
@@ -130,11 +163,18 @@ func GetWebOauthUserinfo(openId string, lang string, accessToken string) (map[st
 // 返回：
 // 成功返回 { "errcode":0,"errmsg":"ok"}
 // 失败返回 { "errcode":40003,"errmsg":"invalid openid"}
-func CheckWebOauthAccessTokenEffective(openId string, accessToken string) (map[string]string, error) {
-	return map[string]string{}, nil
+func CheckWebOauthAccessTokenValid(openId string, accessToken string) (map[string]string, error) {
+	resData, err := MakeGetReq(CHECK_WEB_OAUTH_ACCESS_TOKEN_VALID, map[string]string{
+		"openid":openId,
+		"access_token":accessToken,
+	})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
-// CheckWebOauthAccessTokenEffective
+// SendTemplateMessage
 //
 // 参数：{
 // 	  "touser":"OPENID",
@@ -188,7 +228,16 @@ func SendTemplateMessage(accountid int, data map[string]string) (map[string]stri
 // 成功返回 { "openid": "OPENID", "session_key": "SESSIONKEY", "unionid": "UNIONID" }
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
 func WxappOauth(appId string, appSecret string, jsCode string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakeGetReq(CHECK_WEB_OAUTH_ACCESS_TOKEN_VALID, map[string]string{
+		"appid":appId,
+		"secret":appSecret,
+		"js_code":jsCode,
+		"grant_type":"authorization_code",
+	})
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // GetWxappCode
@@ -204,7 +253,14 @@ func WxappOauth(appId string, appSecret string, jsCode string) (map[string]strin
 // 成功返回 图片
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
 func GetWxappCode(data map[string]string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakePostReq(GET_WXAPP_CODE, map[string]interface{}{
+		"path" : data["page"],
+		"width" : data["width"],
+	}, "application/json")
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // GetWxappCodeUnlimit
@@ -221,7 +277,14 @@ func GetWxappCode(data map[string]string) (map[string]string, error) {
 // 成功返回 图片
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
 func GetWxappCodeUnlimit(data map[string]string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakePostReq(GET_WXAPP_CODE_UNLIMIT, map[string]interface{}{
+		"path" : data["page"],
+		"width" : data["width"],
+	}, "application/json")
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // GetWxappCodeQrcode
@@ -234,7 +297,16 @@ func GetWxappCodeUnlimit(data map[string]string) (map[string]string, error) {
 // 成功返回 图片
 // 失败返回 { "errcode":40029,"errmsg":"invalid openid"}
 func GetWxappCodeQrcode(data map[string]string) (map[string]string, error) {
-	return map[string]string{}, nil
+	resData, err := MakePostReq(GET_WXAPP_CODE_QRCODE, map[string]interface{}{
+		"page" : data["page"],
+		"width" : data["width"],
+		"scene" : data["scene"],
+		"auto_color" : data["auto_color"],
+	}, "application/json")
+	if err != nil {
+		return map[string]string{}, err
+	}
+	return resData, nil
 }
 
 // SendWxappTemplateMessage
@@ -300,7 +372,7 @@ func GetToken()  {
 }
 
 
-func MakeGetReq(url string, data map[string]string) (map[string]interface{}, error) {
+func MakeGetReq(url string, data map[string]string) (map[string]string, error) {
 
 	var count = 0
 	for k, v := range data {
@@ -314,17 +386,17 @@ func MakeGetReq(url string, data map[string]string) (map[string]interface{}, err
 
 	res, err := http.Get(url)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]string{}, err
 	}
 	if res.StatusCode != 200 {
-		return map[string]interface{}{}, errors.New("网络错误")
+		return map[string]string{}, errors.New("网络错误")
 	}
 
 	var reader io.ReadCloser
 	if res.Header.Get("Content-Encoding") == "gzip" {
 		reader, err = gzip.NewReader(res.Body)
 		if err != nil {
-			return map[string]interface{}{}, err
+			return map[string]string{}, err
 		}
 	} else {
 		reader = res.Body
@@ -334,22 +406,22 @@ func MakeGetReq(url string, data map[string]string) (map[string]interface{}, err
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]string{}, err
 	}
 
-	var resJsonData map[string]interface{}
+	var resJsonData map[string]string
 	err = json.Unmarshal(body, &resJsonData)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]string{}, err
 	}
 
 	return resJsonData, nil
 }
 
-func MakePostReq(url string, postData map[string]interface{}, contentType string) (map[string]interface{}, error) {
+func MakePostReq(url string, postData map[string]interface{}, contentType string) (map[string]string, error) {
 	jsonData ,jsonErr := json.Marshal(postData)
 	if jsonErr != nil {
-		return map[string]interface{}{}, jsonErr
+		return map[string]string{}, jsonErr
 	}
 
 	res, _ := http.Post(url, contentType, bytes.NewBuffer(jsonData))
@@ -361,7 +433,7 @@ func MakePostReq(url string, postData map[string]interface{}, contentType string
 	if res.Header.Get("Content-Encoding") == "gzip" {
 		reader, err = gzip.NewReader(res.Body)
 		if err != nil {
-			return map[string]interface{}{}, err
+			return map[string]string{}, err
 		}
 	} else {
 		reader = res.Body
@@ -371,13 +443,13 @@ func MakePostReq(url string, postData map[string]interface{}, contentType string
 
 	body, err := ioutil.ReadAll(reader)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]string{}, err
 	}
 
-	var resJsonData map[string]interface{}
+	var resJsonData map[string]string
 	err = json.Unmarshal(body, &resJsonData)
 	if err != nil {
-		return map[string]interface{}{}, err
+		return map[string]string{}, err
 	}
 
 	return resJsonData, nil

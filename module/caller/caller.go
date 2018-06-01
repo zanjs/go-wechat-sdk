@@ -34,8 +34,8 @@ func Call(c *gin.Context, accountId int) (map[string]string, error){
 		resData, err = wechat.RefreshWebOauthAccessToken(accountInfo["appId"], c.PostForm("refreshToken"))
 	case "GetWebOauthUserinfo":
 		resData, err = wechat.GetWebOauthUserinfo(accountInfo["appId"],c.PostForm("lang"),c.PostForm("refreshToken"))
-	case "CheckWebOauthAccessTokenEffective":
-		resData, err = wechat.CheckWebOauthAccessTokenEffective(c.PostForm("openId"),c.PostForm("refreshToken"))
+	case "CheckWebOauthAccessTokenValid":
+		resData, err = wechat.CheckWebOauthAccessTokenValid(c.PostForm("openId"),c.PostForm("refreshToken"))
 	case "SendTemplateMessage":
 		resData, err = wechat.SendTemplateMessage(1, map[string]string{})
 	case "WxappOauth":
