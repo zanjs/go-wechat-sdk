@@ -1,7 +1,6 @@
-package controllers
+package wechat
 
 import (
-	// "github.com/gin-gonic/gin"
 	"net/http"
 	"io"
 	"errors"
@@ -10,7 +9,6 @@ import (
 	"bytes"
 	"compress/gzip"
 )
-
 
 // 内部api
 // - 动态获取公众号数据appid, appsecret, payid, paysecret
@@ -56,10 +54,6 @@ const (
 
 	PAY_UNIFIED_ORDER = "https://api.mch.weixin.qq.com/pay/unifiedorder" // 下订单
 )
-
-// ---------------------------
-// 外部api
-// ---------------------------
 
 func GetNewAccessToken()  {
 	return
@@ -117,12 +111,9 @@ func GetToken()  {
 	return
 }
 
-func GetAccountInfo(accountId int) (map[string]string, error) {
-	return map[string]string{}, nil
-}
 
 func MakeGetReq(url string, data map[string]string) (map[string]interface{}, error) {
-	
+
 	var count = 0
 	for k, v := range data {
 		if count == 0 {
@@ -132,7 +123,7 @@ func MakeGetReq(url string, data map[string]string) (map[string]interface{}, err
 		}
 		count++
 	}
-	
+
 	res, err := http.Get(url)
 	if err != nil {
 		return map[string]interface{}{}, err
@@ -200,6 +191,6 @@ func MakePostReq(url string, postData map[string]interface{}, contentType string
 	if err != nil {
 		return map[string]interface{}{}, err
 	}
-	
+
 	return resJsonData, nil
 }
