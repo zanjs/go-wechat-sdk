@@ -65,6 +65,50 @@ func GetNewAccessToken()  {
 	return
 }
 
+func GetWebOauthAccessToken()  {
+	return
+}
+
+func RefreshWebOauthAccessToken()  {
+	return
+}
+
+func GetWebOauthUserinfo()  {
+	return
+}
+
+func CheckWebOauthAccessTokenEffective()  {
+	return
+}
+
+func SendTemplateMessage()  {
+	return
+}
+
+func WxappOauth()  {
+	return
+}
+
+func GetWxappCode()  {
+	return
+}
+
+func GetWxappCodeUnlimit()  {
+	return
+}
+
+func GetWxappCodeQrcode()  {
+	return
+}
+
+func SendWxappTemplateMessage()  {
+	return
+}
+
+func PayUnifiedOrder()  {
+	return
+}
+
 // ---------------------------
 // sdk内部Api
 // ---------------------------
